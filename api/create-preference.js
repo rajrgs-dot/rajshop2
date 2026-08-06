@@ -5,13 +5,8 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método não permitido' });
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido' });
 
     try {
         const { title, unit_price } = req.body;
@@ -30,9 +25,6 @@ export default async function handler(req, res) {
         const host = req.headers.host;
         const baseUrl = `${protocol}://${host}`;
 
-        // Codifica o título do produto para passar na URL de sucesso
-        const encodedTitle = encodeURIComponent(title);
-
         const response = await preference.create({
             body: {
                 items: [
@@ -45,12 +37,11 @@ export default async function handler(req, res) {
                 ],
                 external_reference: title,
                 back_urls: {
-                    // Direciona para a página de sucesso passando o título do produto
-                    success: `${baseUrl}/sucesso.html?external_reference=${encodedTitle}`,
+                    // Manda para o validador de download passando o ID do pagamento
+                    success: `${baseUrl}/api/download?payment_id={payment_id}`,
                     failure: `${baseUrl}/index.html`,
-                    pending: `${baseUrl}/pendente.html`
+                    pending: `${baseUrl}/index.html`
                 },
-                // Redireciona o cliente automaticamente assim que o pagamento for aprovado
                 auto_return: 'approved'
             }
         });
