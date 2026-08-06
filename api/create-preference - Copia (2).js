@@ -26,12 +26,10 @@ export default async function handler(req, res) {
 
         const preference = new Preference(client);
 
+        // Monta a URL base do seu domínio hospedado na Vercel
         const protocol = req.headers['x-forwarded-proto'] || 'https';
         const host = req.headers.host;
         const baseUrl = `${protocol}://${host}`;
-
-        // Codifica o título do produto para passar na URL de sucesso
-        const encodedTitle = encodeURIComponent(title);
 
         const response = await preference.create({
             body: {
@@ -43,14 +41,18 @@ export default async function handler(req, res) {
                         currency_id: 'BRL'
                     }
                 ],
+                // Rastreio interno do produto enviado de volta no Webhook
                 external_reference: title,
+
+                // URL do Webhook que receberá o aviso do pagamento
+                notification_url: `${baseUrl}/api/webhook`,
+
+                // Páginas de redirecionamento do cliente na tela
                 back_urls: {
-                    // Direciona para a página de sucesso passando o título do produto
-                    success: `${baseUrl}/sucesso.html?external_reference=${encodedTitle}`,
-                    failure: `${baseUrl}/index.html`,
+                    success: `${baseUrl}/sucesso.html`,
+                    failure: `${baseUrl}/erro.html`,
                     pending: `${baseUrl}/pendente.html`
                 },
-                // Redireciona o cliente automaticamente assim que o pagamento for aprovado
                 auto_return: 'approved'
             }
         });

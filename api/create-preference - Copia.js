@@ -1,6 +1,7 @@
 const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 export default async function handler(req, res) {
+    // Configuração de cabeçalhos CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,18 +21,12 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Título e preço são obrigatórios' });
         }
 
+        // Inicializa SDK com o Token vindo das Variáveis de Ambiente da Vercel
         const client = new MercadoPagoConfig({ 
             accessToken: process.env.MP_ACCESS_TOKEN 
         });
 
         const preference = new Preference(client);
-
-        const protocol = req.headers['x-forwarded-proto'] || 'https';
-        const host = req.headers.host;
-        const baseUrl = `${protocol}://${host}`;
-
-        // Codifica o título do produto para passar na URL de sucesso
-        const encodedTitle = encodeURIComponent(title);
 
         const response = await preference.create({
             body: {
@@ -43,21 +38,19 @@ export default async function handler(req, res) {
                         currency_id: 'BRL'
                     }
                 ],
-                external_reference: title,
                 back_urls: {
-                    // Direciona para a página de sucesso passando o título do produto
-                    success: `${baseUrl}/sucesso.html?external_reference=${encodedTitle}`,
-                    failure: `${baseUrl}/index.html`,
-                    pending: `${baseUrl}/pendente.html`
+                    success: 'https://' + req.headers.host + '/sucesso.html',
+                    failure: 'https://' + req.headers.host + '/erro.html',
+                    pending: 'https://' + req.headers.host + '/pendente.html'
                 },
-                // Redireciona o cliente automaticamente assim que o pagamento for aprovado
                 auto_return: 'approved'
             }
         });
 
+        // Retorna o link oficial de pagamento do Mercado Pago
         return res.status(200).json({ init_point: response.init_point });
     } catch (error) {
         console.error('Erro Mercado Pago:', error);
-        return res.status(500).json({ error: 'Erro ao gerar pagamento', details: error.message });
+        return res.status(500).json({ error: 'Erro ao gerar checkout', details: error.message });
     }
 }
