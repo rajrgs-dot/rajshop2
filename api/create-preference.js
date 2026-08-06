@@ -37,12 +37,11 @@ export default async function handler(req, res) {
                 ],
                 external_reference: title,
                 back_urls: {
-                    // Manda para o validador de download passando o ID do pagamento
-                    success: `${baseUrl}/api/download?payment_id={payment_id}`,
-                    failure: `${baseUrl}/index.html`,
-                    pending: `${baseUrl}/index.html`
-                },
-                auto_return: 'approved'
+    success: `${baseUrl}/api/download`,
+    failure: `${baseUrl}/index.html`,
+    pending: `${baseUrl}/index.html`
+},
+auto_return: 'approved'
             }
         });
 
