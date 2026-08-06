@@ -1,15 +1,30 @@
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 
 export default async function handler(req, res) {
-    // Captura o ID do pagamento enviado via query string pelo Mercado Pago
+    // Captura o ID da transação enviado pelo Mercado Pago
     const payment_id = req.query.payment_id || req.query.collection_id || req.query.id;
 
     if (!payment_id) {
         return res.status(400).send(`
-            <div style="font-family: sans-serif; text-align: center; padding: 40px;">
-                <h2>Acesso Negado</h2>
-                <p>Identificador de pagamento ausente na requisição.</p>
-            </div>
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Acesso Negado</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: #ebebeb; margin: 0; padding: 20px; }
+                    .card { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                    h2 { color: #cc0000; }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>Acesso Negado</h2>
+                    <p>Identificador de pagamento não encontrado na requisição.</p>
+                </div>
+            </body>
+            </html>
         `);
     }
 
@@ -19,13 +34,13 @@ export default async function handler(req, res) {
         });
         const payment = new Payment(client);
 
-        // Consulta o pagamento na API do Mercado Pago
+        // Consulta a API do Mercado Pago para verificar a compra
         const paymentData = await payment.get({ id: payment_id });
 
         if (paymentData && paymentData.status === 'approved') {
             const produtoComprado = paymentData.external_reference;
             
-            // Leitura segura da variável RESETS_JSON
+            // Lê a lista de links protegida salva na Vercel
             let listaLinks = {};
             try {
                 listaLinks = JSON.parse(process.env.RESETS_JSON || '{}');
@@ -35,36 +50,110 @@ export default async function handler(req, res) {
 
             const linkDownload = listaLinks[produtoComprado];
 
-            if (linkDownload) {
-                // Redireciona o comprador para o link do arquivo
-                return res.redirect(302, linkDownload);
-            } else {
-                return res.status(404).send(`
-                    <div style="font-family: sans-serif; text-align: center; padding: 40px;">
-                        <h2>Pagamento Aprovado com Sucesso! 🎉</h2>
-                        <p>O produto <strong>${produtoComprado || 'solicitado'}</strong> foi pago.</p>
-                        <p>Para receber o arquivo do reset, entre em contato com nosso suporte:</p>
-                        <p><strong>Email:</strong> rajrgsinfors@gmail.com</p>
+            // Retorna a página HTML com o botão de download
+            return res.status(200).send(`
+                <!DOCTYPE html>
+                <html lang="pt-br">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Pagamento Aprovado | RAJShop</title>
+                    <style>
+                        body { font-family: Arial, Helvetica, sans-serif; background: #ebebeb; margin: 0; padding: 20px; }
+                        .container { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                        .icon { font-size: 50px; color: #00a650; margin-bottom: 10px; }
+                        h1 { font-size: 22px; color: #333; margin-bottom: 10px; }
+                        p { color: #555; font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+                        .product-name { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 6px; font-weight: bold; color: #1e293b; margin-bottom: 25px; }
+                        .btn-download {
+                            display: inline-block;
+                            background: #00a650;
+                            color: white;
+                            font-weight: bold;
+                            text-decoration: none;
+                            padding: 16px 32px;
+                            border-radius: 8px;
+                            font-size: 16px;
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+                            transition: background 0.2s, transform 0.1s;
+                        }
+                        .btn-download:hover { background: #008741; transform: scale(1.02); }
+                        .footer { margin-top: 35px; font-size: 12px; color: #777; border-top: 1px solid #eee; padding-top: 15px; }
+                    </style>
+                </head>
+                <body>
+
+                <div class="container">
+                    <div class="icon">✓</div>
+                    <h1>Pagamento Aprovado!</h1>
+                    <p>Obrigado pela compra. Seu produto foi liberado com sucesso:</p>
+                    
+                    <div class="product-name">${produtoComprado || 'Reset Selecionado'}</div>
+
+                    ${linkDownload ? `
+                        <a href="${linkDownload}" target="_blank" class="btn-download">
+                            Clique aqui para baixar o Reset
+                        </a>
+                    ` : `
+                        <p style="color: #cc0000;">Não foi possível recuperar o link automático para este produto.</p>
+                        <p>Por favor, envie o comprovante para nosso suporte:</p>
+                    `}
+
+                    <div class="footer">
+                        <strong>RAJShop Resets</strong><br>
+                        Suporte: rajrgsinfors@gmail.com | YouTube: youtube.com/@rajrgs
                     </div>
-                `);
-            }
+                </div>
+
+                </body>
+                </html>
+            `);
         } else {
             return res.status(403).send(`
-                <div style="font-family: sans-serif; text-align: center; padding: 40px;">
-                    <h2>Pagamento Pendente ou Recusado</h2>
-                    <p>Status atual: ${paymentData ? paymentData.status : 'desconhecido'}</p>
-                    <a href="/">Voltar para a loja</a>
-                </div>
+                <!DOCTYPE html>
+                <html lang="pt-br">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Pagamento Pendente</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; background: #ebebeb; margin: 0; padding: 20px; }
+                        .card { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                        a { color: #00a650; font-weight: bold; text-decoration: none; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h2>Pagamento Pendente ou Recusado</h2>
+                        <p>Status atual da transação: <strong>${paymentData ? paymentData.status : 'desconhecido'}</strong></p>
+                        <p><a href="/">Voltar para a página inicial</a></p>
+                    </div>
+                </body>
+                </html>
             `);
         }
     } catch (error) {
-        console.error('Erro no processamento de download:', error);
+        console.error('Erro na geração da página de download:', error);
         return res.status(500).send(`
-            <div style="font-family: sans-serif; text-align: center; padding: 40px;">
-                <h2>Ocorreu um erro no servidor</h2>
-                <p>Por favor, entre em contato informando o ID da compra: <strong>${payment_id}</strong></p>
-                <p>Contato: rajrgsinfors@gmail.com</p>
-            </div>
+            <!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Erro no Servidor</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: #ebebeb; margin: 0; padding: 20px; }
+                    .card { max-width: 500px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h2>Erro ao Processar Solicitação</h2>
+                    <p>Ocorreu uma falha na verificação da compra.</p>
+                    <p>Informe o ID <strong>${payment_id}</strong> para o suporte: <strong>rajrgsinfors@gmail.com</strong></p>
+                </div>
+            </body>
+            </html>
         `);
     }
 }
