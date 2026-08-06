@@ -1,0 +1,11 @@
+{
+  "name": "rajshop2-mercadopago",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "mercadopago": "^2.0.15"
+  }
+}

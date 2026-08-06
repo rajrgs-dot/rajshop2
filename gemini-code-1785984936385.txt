@@ -1,0 +1,8 @@
+rajshop2/
+├── api/
+│   └── create-preference.js   # Função Serverless que gera o pagamento
+├── public/
+│   ├── index.html             # Sua página de vendas/checkout
+│   └── script.js              # Chamada para o backend
+├── package.json               # Dependências do Node.js
+└── README.md
