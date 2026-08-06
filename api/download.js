@@ -1,13 +1,10 @@
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 
-// Dicionário de downloads mantido no servidor (invisível no HTML público)
-const DOWNLOAD_MAP = JSON.parse(process.env.RESETS_JSON || '{}');
-
 export default async function handler(req, res) {
     const { payment_id } = req.query;
 
     if (!payment_id) {
-        return res.status(400).send('<h1>Acesso negado: ID de pagamento ausente.</h1>');
+        return res.status(400).send('<h1 style="font-family: sans-serif; text-align: center; margin-top: 50px;">Acesso negado: ID de pagamento ausente.</h1>');
     }
 
     try {
@@ -16,25 +13,27 @@ export default async function handler(req, res) {
         });
         const payment = new Payment(client);
 
-        // Consulta a API do Mercado Pago para verificar a compra real
+        // Consulta o Mercado Pago para verificar se a compra é REAL e APROVADA
         const paymentData = await payment.get({ id: payment_id });
 
-        // Validação estrita do status do pagamento
         if (paymentData.status === 'approved') {
-            const productName = paymentData.external_reference;
-            const downloadUrl = DOWNLOAD_MAP[productName];
+            const produtoComprado = paymentData.external_reference;
+            
+            // Pega a lista de links cadastrada nas Variáveis de Ambiente da Vercel
+            const listaLinks = JSON.parse(process.env.RESETS_JSON || '{}');
+            const linkDownload = listaLinks[produtoComprado];
 
-            if (downloadUrl) {
-                // Redireciona o comprador para o arquivo real de download
-                return res.redirect(302, downloadUrl);
+            if (linkDownload) {
+                // Redireciona o cliente diretamente para baixar o arquivo
+                return res.redirect(302, linkDownload);
             } else {
-                return res.status(404).send('<h1>Arquivo não encontrado. Entre em contato com o suporte.</h1>');
+                return res.status(404).send('<h1 style="font-family: sans-serif; text-align: center; margin-top: 50px;">Arquivo não encontrado. Entre em contato com rajrgsinfors@gmail.com</h1>');
             }
         } else {
-            return res.status(403).send('<h1>Pagamento pendente ou não aprovado.</h1>');
+            return res.status(403).send('<h1 style="font-family: sans-serif; text-align: center; margin-top: 50px;">Pagamento não aprovado ou em processamento.</h1>');
         }
     } catch (error) {
-        console.error('Erro na validação do download:', error);
-        return res.status(500).send('<h1>Erro ao validar pagamento. Tente novamente mais tarde.</h1>');
+        console.error('Erro ao validar pagamento:', error);
+        return res.status(500).send('<h1 style="font-family: sans-serif; text-align: center; margin-top: 50px;">Erro ao validar pagamento. Tente novamente mais tarde.</h1>');
     }
 }
