@@ -1,88 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pagamento Aprovado | RAJShop</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #ebebeb; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .icon { font-size: 50px; color: #00a650; margin-bottom: 10px; }
-        h1 { font-size: 22px; color: #333; margin-bottom: 10px; }
-        p { color: #666; font-size: 15px; margin-bottom: 25px; }
-        .btn-download {
-            display: inline-block;
-            background: #ffe600;
-            color: #000;
-            font-weight: bold;
-            text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            transition: background 0.2s;
-        }
-        .btn-download:hover { background: #e6ce00; }
-        .footer { margin-top: 30px; font-size: 12px; color: #888; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="icon">✓</div>
-    <h1>Pagamento Confirmado!</h1>
-    <p id="produto-nome">Seu produto está pronto para download.</p>
-
-    <a id="download-btn" href="#" class="btn-download" style="display: none;">
-        Baixar Reset Agora
-    </a>
-
-    <div class="footer">
-        Dúvidas ou suporte? Entre em contato: rajrgsinfors@gmail.com
-    </div>
-</div>
-
-<script>
-    // Mapeamento dos produtos para seus respectivos links de download
-    const DOWNLOAD_LINKS = {
-        'Reset Canon G7010 erro 5B00': 'https://mega.nz/file/BVsh3S7L#kMED4giz-NGm82Kz_CO1Jm6XC8RNMPyQRqKXYU5dvRk',
-        'Reset Epson L365 L360 L310 L220 L130': 'https://seudominio.com/downloads/reset-epson-l365-series.zip',
-        'Reset Epson L3150 L3110 Almofadas': 'https://seudominio.com/downloads/reset-epson-l3150.zip',
-        'Reset Epson TX123 TX125 TX135': 'https://seudominio.com/downloads/reset-epson-tx123.zip',
-        'Reset Canon G6010': 'https://bit.ly/3zwz7vx',
-        'Reset Canon G7010': 'https://seudominio.com/downloads/reset-canon-g7010.zip',
-        'Reset Epson L120 L121': 'https://seudominio.com/downloads/reset-epson-l120.zip',
-        'Reset Epson L3150 ou L3110 erro de almofadas': 'https://seudominio.com/downloads/reset-epson-l3150.zip',
-        'Reset Canon G3000 G4000 Mg IP IX': 'https://seudominio.com/downloads/reset-canon-g3000.zip',
-        'Acesso remoto para Reset': 'https://wa.me/5500000000000',
-        'Reset Epson L3250 L3210 L5290': 'https://seudominio.com/downloads/reset-epson-l3250.zip',
-        'Reset Epson L4260 L4267': 'https://seudominio.com/downloads/reset-epson-l4260.zip',
-        'Service tool Canon 2025 V6210 toda linha Canon': 'https://seudominio.com/downloads/service-tool-v6210.zip',
-        'Reset Epson TX235w': 'https://seudominio.com/downloads/reset-epson-tx235w.zip',
-        'Reset Epson L395 ou L495 erro de almofadas': 'https://seudominio.com/downloads/reset-epson-l395.zip',
-        'Reset Epson L396 erro de almofadas': 'https://seudominio.com/downloads/reset-epson-l396.zip',
-        'Reset Epson L375 L475 erro de almofadas': 'https://seudominio.com/downloads/reset-epson-l375.zip',
-        'Reset Epson L365 L360 L310 L220 L130 erro de almofadas': 'https://seudominio.com/downloads/reset-epson-l365.zip',
-        'Reset Canon GM4010 GM2010 erro 5b00 Almofadas cheias': 'https://seudominio.com/downloads/reset-canon-gm4010.zip'
-    };
-
-    // Obtém o nome do produto passado na URL
-    const params = new URLSearchParams(window.location.search);
-    const externalRef = params.get('external_reference');
-
-    if (externalRef) {
-        document.getElementById('produto-nome').innerText = `Produto: ${externalRef}`;
-        
-        // Busca o link de download correspondente
-        const link = DOWNLOAD_LINKS[externalRef] || 'https://seudominio.com/downloads/geral.zip';
-        
-        const btn = document.getElementById('download-btn');
-        btn.href = link;
-        btn.style.display = 'inline-block';
-    } else {
-        document.getElementById('produto-nome').innerText = 'Pagamento concluído com sucesso!';
-    }
-</script>
-
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0;url=/">
+    <title>Redirecting...</title>
+  </head>
+  <body>
+    If you are not redirected automatically, <a href="/">click here</a>.
+  </body>
 </html>
